@@ -24,10 +24,27 @@
       "responsavel": "eu",
       "semana": null,
       "status": "aberta",
-      "tipo": "normal",
-      "subtarefas": [],
+      "tipo": "lote",
+      "subtarefas": [
+        {
+          "obra": "Obra 02",
+          "concluida": false
+        },
+        {
+          "obra": "Obra 03",
+          "concluida": false
+        },
+        {
+          "obra": "Obra 05",
+          "concluida": false
+        },
+        {
+          "obra": "Obra 04",
+          "concluida": false
+        }
+      ],
       "criadaEm": "2026-05-11T17:31:20.497Z",
-      "atualizadaEm": "2026-05-11T17:32:03.051Z"
+      "atualizadaEm": "2026-05-11T17:32:12.131Z"
     },
     {
       "id": "61d64fe4-d444-4685-8d43-77e151c30020",
