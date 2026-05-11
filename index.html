@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quadro de Demandas</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont/dist/tabler-icons.min.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #fff;
+  --text: #1a1a1a;
+  --muted: #6b7280;
+  --border: #e0e0e0;
+  --blue: #3b82f6;
+  --blue-bg: #eff6ff;
+  --red: #ef4444;
+  --red-bg: #fef2f2;
+  --green: #22c55e;
+  --green-bg: #f0fdf4;
+  --amber: #f59e0b;
+  --amber-bg: #fffbeb;
+  --purple: #8b5cf6;
+  --purple-bg: #f5f3ff;
+  --gray-bg: #f9fafb;
+  --radius: 6px;
+  --panel-w: 380px;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  background: var(--bg);
+  color: var(--text);
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── Header ── */
+.app-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.app-title { font-weight: 700; font-size: 15px; flex: 1; }
+
+.save-status {
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 90px;
+  justify-content: flex-end;
+}
+.save-status.saving { color: var(--blue); }
+.save-status.saved  { color: var(--green); }
+.save-status.error  { color: var(--red); }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.save-status .ti-loader-2 { display: inline-block; animation: spin 1s linear infinite; }
+
+/* ── Tabs ── */
+.tab-bar {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.tab-btn {
+  flex: 1;
+  padding: 10px 4px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  border-bottom: 2px solid transparent;
+  transition: color 150ms, border-color 150ms;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+.tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+/* ── Content ── */
+.tab-content { flex: 1; overflow-y: auto; }
+.tab-pane { display: none; padding: 14px; }
+.tab-pane.active { display: block; }
+
+/* ── Buttons ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  transition: background 150ms, border-color 150ms, color 150ms;
+  font-family: inherit;
+}
+.btn:hover { background: var(--gray-bg); }
+.btn-primary { background: var(--blue); color: #fff; border-color: var(--blue); }
+.btn-primary:hover { background: #2563eb; }
+.btn-ghost { border-color: transparent; }
+.btn-ghost:hover { background: var(--gray-bg); }
+.btn-icon { padding: 5px 6px; border-color: transparent; }
+.btn-icon:hover { background: var(--gray-bg); }
+.btn-danger:hover { color: var(--red); background: var(--red-bg); border-color: var(--red); }
+.btn-sm { padding: 4px 8px; font-size: 12px; }
+
+/* ── Config button ── */
+.cfg-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--muted);
+  font-family: inherit;
+  transition: all 150ms;
+}
+.cfg-btn:hover { color: var(--red); border-color: var(--red); background: var(--red-bg); }
+
+/* ── Inbox ── */
+.inbox-input-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.inbox-input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 15px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 150ms;
+}
+.inbox-input:focus { border-color: var(--blue); }
+
+.task-list { display: flex; flex-direction: column; gap: 6px; }
+.task-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.task-item-text { flex: 1; line-height: 1.45; padding-top: 1px; word-break: break-word; }
+.task-actions { display: flex; gap: 2px; flex-shrink: 0; }
+
+/* ── Week ── */
+.week-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.week-label {
+  flex: 1;
+  text-align: center;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.week-stats {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.stat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  background: var(--gray-bg);
+  border-radius: 20px;
+  font-size: 12px;
+}
+.stat-chip b { font-size: 14px; font-weight: 700; }
+
+.resp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+}
+.resp-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.resp-card-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 12px;
+  font-weight: 600;
+  font-size: 13px;
+  border-bottom: 1px solid var(--border);
+}
+.resp-card-head .count { margin-left: auto; font-weight: 400; font-size: 11px; opacity: .75; }
+
+.card-eu        .resp-card-head { background: var(--blue-bg);   color: var(--blue);   }
+.card-estagiaria .resp-card-head { background: var(--purple-bg); color: var(--purple); }
+.card-terceiro  .resp-card-head { background: var(--amber-bg);  color: var(--amber);  }
+
+.resp-tasks { padding: 8px; display: flex; flex-direction: column; gap: 5px; }
+
+.wtask {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+}
+.wtask-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.wtask-text { flex: 1; line-height: 1.45; word-break: break-word; }
+.wtask.done .wtask-text { text-decoration: line-through; color: var(--muted); }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  flex-shrink: 0;
+  border: 1px solid transparent;
+  transition: all 150ms;
+}
+.badge:hover { opacity: .8; }
+.badge-aberta   { background: #f3f4f6; color: var(--muted); border-color: var(--border); }
+.badge-bloqueada{ background: var(--red-bg); color: var(--red); border-color: var(--red); }
+.badge-concluida{ background: var(--green-bg); color: var(--green); border-color: var(--green); }
+
+/* Progress */
+.progress-wrap {
+  margin-top: 7px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.progress-bar {
+  flex: 1;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--blue);
+  border-radius: 2px;
+  transition: width 300ms;
+}
+.progress-label { font-size: 11px; color: var(--muted); white-space: nowrap; }
+
+.subtask-list {
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+  padding-left: 6px;
+  border-left: 2px solid var(--border);
+}
+.subtask-list.open { display: flex; }
+.subtask-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  padding: 2px 0;
+}
+.subtask-row.done span { text-decoration: line-through; color: var(--muted); }
+
+/* ── Obras ── */
+.obras-add {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.obras-add input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 150ms;
+}
+.obras-add input:focus { border-color: var(--blue); }
+
+.obra-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 5px;
+  cursor: pointer;
+  transition: background 150ms;
+  user-select: none;
+}
+.obra-row:hover { background: var(--gray-bg); }
+.obra-row.expanded { border-color: var(--blue); border-radius: var(--radius) var(--radius) 0 0; margin-bottom: 0; }
+.obra-name { flex: 1; font-weight: 500; }
+.obra-count { font-size: 12px; color: var(--muted); }
+
+.obra-detail {
+  display: none;
+  border: 1px solid var(--blue);
+  border-top: none;
+  border-radius: 0 0 var(--radius) var(--radius);
+  padding: 10px 14px;
+  margin-bottom: 5px;
+  background: var(--blue-bg);
+}
+.obra-detail.open { display: block; }
+.obra-task-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(0,0,0,.06);
+  font-size: 13px;
+}
+.obra-task-row:last-child { border-bottom: none; }
+
+/* ── Modal ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.modal-overlay.hidden { display: none; }
+.modal {
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 24px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 8px 40px rgba(0,0,0,.15);
+}
+.modal-title { font-size: 17px; font-weight: 700; margin-bottom: 18px; }
+
+.form-group { margin-bottom: 14px; }
+.form-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+.form-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 150ms;
+}
+.form-input:focus { border-color: var(--blue); }
+.form-hint { font-size: 11px; color: var(--muted); margin-top: 5px; line-height: 1.4; }
+
+/* ── Panel ── */
+.panel-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.2);
+  z-index: 50;
+  display: none;
+}
+.panel-backdrop.open { display: block; }
+
+.panel {
+  position: fixed;
+  top: 0;
+  right: calc(-1 * var(--panel-w) - 2px);
+  width: var(--panel-w);
+  max-width: 100vw;
+  height: 100%;
+  background: var(--bg);
+  border-left: 1px solid var(--border);
+  z-index: 51;
+  display: flex;
+  flex-direction: column;
+  transition: right 150ms ease-out;
+}
+.panel.open { right: 0; }
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 14px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.panel-head-title { flex: 1; font-weight: 600; font-size: 14px; }
+
+.panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.psec { margin-bottom: 20px; }
+.psec-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.pill-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.pill {
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 150ms;
+  font-family: inherit;
+}
+.pill:hover { background: var(--gray-bg); }
+.pill.sel-eu         { background: var(--blue-bg);   border-color: var(--blue);   color: var(--blue); }
+.pill.sel-estagiaria { background: var(--purple-bg); border-color: var(--purple); color: var(--purple); }
+.pill.sel-terceiro   { background: var(--amber-bg);  border-color: var(--amber);  color: var(--amber); }
+.pill.sel-inbox    { background: #f3f4f6; border-color: var(--muted); color: var(--text); }
+.pill.sel-aberta   { background: #f3f4f6; border-color: var(--muted); color: var(--text); }
+.pill.sel-bloqueada{ background: var(--red-bg);   border-color: var(--red);   color: var(--red); }
+.pill.sel-concluida{ background: var(--green-bg); border-color: var(--green); color: var(--green); }
+.pill.sel-normal   { background: var(--blue-bg);   border-color: var(--blue);   color: var(--blue); }
+.pill.sel-lote     { background: var(--purple-bg); border-color: var(--purple); color: var(--purple); }
+.pill.sel-semana   { background: var(--blue-bg);   border-color: var(--blue);   color: var(--blue); }
+
+.obra-checklist {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow-y: auto;
+  max-height: 220px;
+}
+.obra-check-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  cursor: pointer;
+  transition: background 150ms;
+}
+.obra-check-row:not(:last-child) { border-bottom: 1px solid var(--border); }
+.obra-check-row:hover { background: var(--gray-bg); }
+
+input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--blue);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.task-edit {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 64px;
+  outline: none;
+  transition: border-color 150ms;
+}
+.task-edit:focus { border-color: var(--blue); }
+
+.empty {
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.empty i { font-size: 32px; opacity: .25; display: block; margin-bottom: 8px; }
+
+.no-tasks {
+  padding: 10px 12px;
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .resp-grid { grid-template-columns: 1fr; }
+
+  .panel {
+    top: auto;
+    right: 0;
+    bottom: calc(-100% - 2px);
+    width: 100%;
+    height: 88vh;
+    border-left: none;
+    border-top: 1px solid var(--border);
+    border-radius: 14px 14px 0 0;
+    transition: bottom 150ms ease-out;
+  }
+  .panel.open { bottom: 0; right: 0; }
+
+  .week-label { font-size: 12px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     CONFIG MODAL
+══════════════════════════════════════════════ -->
+<div class="modal-overlay hidden" id="configModal">
+  <div class="modal">
+    <div class="modal-title"><i class="ti ti-settings"></i> Configuração do repositório</div>
+
+    <div class="form-group">
+      <label class="form-label">GitHub Owner</label>
+      <input type="text" class="form-input" id="cfgOwner" placeholder="usuario-ou-org" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Repositório</label>
+      <input type="text" class="form-input" id="cfgRepo" placeholder="nome-do-repositorio" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Branch</label>
+      <input type="text" class="form-input" id="cfgBranch" value="main" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Personal Access Token (PAT)</label>
+      <input type="password" class="form-input" id="cfgToken" placeholder="ghp_..." autocomplete="off">
+      <div class="form-hint">Escopo necessário: <strong>repo</strong>. Salvo apenas no localStorage do seu navegador.</div>
+    </div>
+
+    <button class="btn btn-primary" style="width:100%;justify-content:center" id="cfgSaveBtn">
+      <i class="ti ti-device-floppy"></i> Salvar e conectar
+    </button>
+    <div id="cfgError" style="color:var(--red);font-size:12px;margin-top:10px;display:none"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     ORGANIZE PANEL
+══════════════════════════════════════════════ -->
+<div class="panel-backdrop" id="panelBackdrop"></div>
+<div class="panel" id="organizePanel">
+  <div class="panel-head">
+    <span class="panel-head-title"><i class="ti ti-layout-sidebar-right"></i> Organizar tarefa</span>
+    <button class="btn btn-icon" id="panelCloseBtn"><i class="ti ti-x"></i></button>
+  </div>
+  <div class="panel-body" id="panelBody"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     APP SHELL
+══════════════════════════════════════════════ -->
+<header class="app-header">
+  <span class="app-title"><i class="ti ti-checklist"></i> Quadro de Demandas</span>
+  <span class="save-status" id="saveStatus"></span>
+  <button class="cfg-btn" id="openCfgBtn" title="Configurar repositório">
+    <i class="ti ti-settings-2"></i> Configurar
+  </button>
+</header>
+
+<nav class="tab-bar">
+  <button class="tab-btn active" data-tab="inbox"><i class="ti ti-inbox"></i> Inbox</button>
+  <button class="tab-btn" data-tab="semana"><i class="ti ti-calendar-week"></i> Semana</button>
+  <button class="tab-btn" data-tab="obras"><i class="ti ti-building"></i> Obras</button>
+</nav>
+
+<main class="tab-content">
+  <!-- INBOX -->
+  <div class="tab-pane active" id="tab-inbox">
+    <div class="inbox-input-row">
+      <input type="text" class="inbox-input" id="newTaskInput" placeholder="O que precisa ser feito?">
+      <button class="btn btn-primary" id="addTaskBtn"><i class="ti ti-plus"></i></button>
+    </div>
+    <div class="task-list" id="inboxList"></div>
+  </div>
+
+  <!-- SEMANA -->
+  <div class="tab-pane" id="tab-semana">
+    <div class="week-nav">
+      <button class="btn btn-ghost btn-icon" id="prevWeekBtn"><i class="ti ti-chevron-left"></i></button>
+      <span class="week-label" id="weekLabel"></span>
+      <button class="btn btn-ghost btn-icon" id="nextWeekBtn"><i class="ti ti-chevron-right"></i></button>
+    </div>
+    <div class="week-stats" id="weekStats"></div>
+    <div class="resp-grid" id="respGrid"></div>
+  </div>
+
+  <!-- OBRAS -->
+  <div class="tab-pane" id="tab-obras">
+    <div class="obras-add">
+      <input type="text" id="newObraInput" placeholder="Nome da obra...">
+      <button class="btn btn-primary" id="addObraBtn"><i class="ti ti-plus"></i> Adicionar</button>
+    </div>
+    <div id="obrasList"></div>
+  </div>
+</main>
+
+<script>
+'use strict';
+// ═══════════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════════
+const CFG_KEY = 'quadro_demandas_cfg';
+let cfg = { owner: '', repo: '', branch: 'main', token: '' };
+
+function cfgLoad() {
+  try {
+    const s = localStorage.getItem(CFG_KEY);
+    if (s) { cfg = JSON.parse(s); return true; }
+  } catch(e) {}
+  return false;
+}
+
+function cfgSave() {
+  localStorage.setItem(CFG_KEY, JSON.stringify(cfg));
+}
+
+function cfgValid() {
+  return cfg.owner && cfg.repo && cfg.branch && cfg.token;
+}
+
+function openConfigModal() {
+  document.getElementById('cfgOwner').value  = cfg.owner  || '';
+  document.getElementById('cfgRepo').value   = cfg.repo   || '';
+  document.getElementById('cfgBranch').value = cfg.branch || 'main';
+  document.getElementById('cfgToken').value  = cfg.token  || '';
+  document.getElementById('cfgError').style.display = 'none';
+  document.getElementById('configModal').classList.remove('hidden');
+}
+
+function closeConfigModal() {
+  document.getElementById('configModal').classList.add('hidden');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+let st = {
+  obras: [],
+  tarefas: [],
+  sha: null,
+};
+
+let ui = {
+  activeTab: 'inbox',
+  selWeek: '',
+  organizeId: null,
+  expandedTasks: new Set(),
+  expandedObra: null,
+};
+
+// ═══════════════════════════════════════════════════════════════
+// GITHUB API
+// ═══════════════════════════════════════════════════════════════
+const GH = 'https://api.github.com';
+
+function ghHeaders() {
+  return {
+    'Authorization': `token ${cfg.token}`,
+    'Accept': 'application/vnd.github.v3+json',
+    'Content-Type': 'application/json',
+  };
+}
+
+function b64enc(str) {
+  const bytes = new TextEncoder().encode(str);
+  return btoa(Array.from(bytes, b => String.fromCharCode(b)).join(''));
+}
+
+function b64dec(b64) {
+  const binary = atob(b64.replace(/\n/g, ''));
+  const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
+}
+
+async function apiLoad() {
+  setSaveStatus('loading');
+  const url = `${GH}/repos/${cfg.owner}/${cfg.repo}/contents/data/tarefas.json?ref=${cfg.branch}&_=${Date.now()}`;
+  const res = await fetch(url, { headers: ghHeaders() });
+  if (!res.ok) {
+    const txt = await res.text();
+    throw new Error(`HTTP ${res.status} — ${txt.slice(0, 120)}`);
+  }
+  const data = await res.json();
+  st.sha = data.sha;
+  const parsed = JSON.parse(b64dec(data.content));
+  st.obras   = parsed.obras   || [];
+  st.tarefas = parsed.tarefas || [];
+  setSaveStatus('saved');
+}
+
+let saveTimer   = null;
+let isSaving    = false;
+let pendingSave = false;
+
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  setSaveStatus('pending');
+  saveTimer = setTimeout(doSave, 1500);
+}
+
+async function doSave() {
+  if (isSaving) { pendingSave = true; return; }
+  isSaving = true;
+  pendingSave = false;
+  setSaveStatus('saving');
+  try {
+    const body = {
+      message: `update: tarefas ${new Date().toISOString()}`,
+      content: b64enc(JSON.stringify({ obras: st.obras, tarefas: st.tarefas }, null, 2)),
+      sha: st.sha,
+      branch: cfg.branch,
+    };
+    const res = await fetch(
+      `${GH}/repos/${cfg.owner}/${cfg.repo}/contents/data/tarefas.json`,
+      { method: 'PUT', headers: ghHeaders(), body: JSON.stringify(body) }
+    );
+    if (!res.ok) {
+      const txt = await res.text();
+      throw new Error(`HTTP ${res.status} — ${txt.slice(0, 120)}`);
+    }
+    const data = await res.json();
+    st.sha = data.content.sha;
+    setSaveStatus('saved');
+    if (pendingSave) { saveTimer = setTimeout(doSave, 500); }
+  } catch(e) {
+    console.error('Save error:', e);
+    setSaveStatus('error');
+  } finally {
+    isSaving = false;
+  }
+}
+
+function setSaveStatus(status) {
+  const el = document.getElementById('saveStatus');
+  const M = {
+    loading: ['<i class="ti ti-loader-2"></i> carregando...', 'loading'],
+    pending: ['<i class="ti ti-clock"></i>',                  ''],
+    saving:  ['<i class="ti ti-loader-2"></i> salvando...',   'saving'],
+    saved:   ['<i class="ti ti-check"></i> salvo',            'saved'],
+    error:   ['<i class="ti ti-alert-triangle"></i> erro',    'error'],
+  };
+  if (M[status]) {
+    el.innerHTML = M[status][0];
+    el.className = 'save-status ' + M[status][1];
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════════
+function uuid() {
+  if (crypto.randomUUID) return crypto.randomUUID();
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random() * 16 | 0;
+    return (c === 'x' ? r : (r & 3 | 8)).toString(16);
+  });
+}
+
+function nowISO() { return new Date().toISOString(); }
+
+function isoWeek(date) {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const day = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - day);
+  const y1 = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  const wk = Math.ceil(((d - y1) / 86400000 + 1) / 7);
+  return `${d.getUTCFullYear()}-W${String(wk).padStart(2, '0')}`;
+}
+
+function curWeek() { return isoWeek(new Date()); }
+
+function weekMonday(wStr) {
+  const [yr, wk] = wStr.split('-W').map(Number);
+  const jan4 = new Date(yr, 0, 4);
+  const mon  = new Date(jan4);
+  mon.setDate(jan4.getDate() - (jan4.getDay() || 7) + 1 + (wk - 1) * 7);
+  return mon;
+}
+
+function shiftWeek(wStr, delta) {
+  const mon = weekMonday(wStr);
+  mon.setDate(mon.getDate() + delta * 7);
+  return isoWeek(mon);
+}
+
+function fmtWeek(wStr) {
+  const mon = weekMonday(wStr);
+  const sun = new Date(mon);
+  sun.setDate(mon.getDate() + 6);
+  const MO = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  const [, wk] = wStr.split('-W');
+  const s = `${mon.getDate()} ${MO[mon.getMonth()]}`;
+  const e = `${sun.getDate()} ${MO[sun.getMonth()]} ${sun.getFullYear()}`;
+  return `Semana ${wk} — ${s} a ${e}`;
+}
+
+function esc(v) {
+  return String(v)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════════════════════
+function switchTab(tab) {
+  ui.activeTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === tab);
+  });
+  document.querySelectorAll('.tab-pane').forEach(p => {
+    p.classList.toggle('active', p.id === 'tab-' + tab);
+  });
+  render();
+}
+
+function render() {
+  if (ui.activeTab === 'inbox')  renderInbox();
+  if (ui.activeTab === 'semana') renderSemana();
+  if (ui.activeTab === 'obras')  renderObras();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INBOX
+// ═══════════════════════════════════════════════════════════════
+function renderInbox() {
+  const container = document.getElementById('inboxList');
+  const tasks = st.tarefas
+    .filter(t => t.status === 'inbox')
+    .sort((a, b) => b.criadaEm.localeCompare(a.criadaEm));
+
+  if (!tasks.length) {
+    container.innerHTML = `<div class="empty"><i class="ti ti-inbox"></i>Inbox vazio — adicione uma tarefa acima</div>`;
+    return;
+  }
+
+  container.innerHTML = tasks.map(t => `
+    <div class="task-item" data-id="${esc(t.id)}">
+      <span class="task-item-text">${esc(t.texto)}</span>
+      <div class="task-actions">
+        <button class="btn btn-icon" data-action="organize" data-id="${esc(t.id)}" title="Organizar">
+          <i class="ti ti-layout-sidebar-right"></i>
+        </button>
+        <button class="btn btn-icon btn-danger" data-action="delete" data-id="${esc(t.id)}" title="Deletar">
+          <i class="ti ti-trash"></i>
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function addInboxTask() {
+  const inp  = document.getElementById('newTaskInput');
+  const text = inp.value.trim();
+  if (!text) return;
+  st.tarefas.unshift({
+    id: uuid(), texto: text,
+    responsavel: null, semana: null,
+    status: 'inbox', tipo: 'normal',
+    subtarefas: [],
+    criadaEm: nowISO(), atualizadaEm: nowISO(),
+  });
+  inp.value = '';
+  renderInbox();
+  scheduleSave();
+}
+
+function deleteTask(id) {
+  if (!confirm('Deletar esta tarefa?')) return;
+  st.tarefas = st.tarefas.filter(t => t.id !== id);
+  render();
+  scheduleSave();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ORGANIZE PANEL
+// ═══════════════════════════════════════════════════════════════
+function openPanel(id) {
+  ui.organizeId = id;
+  renderPanel();
+  document.getElementById('organizePanel').classList.add('open');
+  document.getElementById('panelBackdrop').classList.add('open');
+}
+
+function closePanel() {
+  document.getElementById('organizePanel').classList.remove('open');
+  document.getElementById('panelBackdrop').classList.remove('open');
+  ui.organizeId = null;
+}
+
+function renderPanel() {
+  const task = st.tarefas.find(t => t.id === ui.organizeId);
+  if (!task) return;
+
+  const cw = curWeek();
+  const nw = shiftWeek(cw, 1);
+
+  const RESPS = [
+    { key: 'eu',          label: 'Eu' },
+    { key: 'estagiaria',  label: 'Estagiária' },
+    { key: 'terceiro',    label: 'Terceiro' },
+  ];
+  const STATUSES = [
+    { key: 'inbox',    label: 'Inbox'    },
+    { key: 'aberta',   label: 'Aberta'   },
+    { key: 'bloqueada',label: 'Bloqueada'},
+    { key: 'concluida',label: 'Concluída'},
+  ];
+
+  const customWeek = task.semana && task.semana !== cw && task.semana !== nw;
+
+  document.getElementById('panelBody').innerHTML = `
+    <div class="psec">
+      <div class="psec-label">Texto</div>
+      <textarea class="task-edit" id="panelText">${esc(task.texto)}</textarea>
+    </div>
+
+    <div class="psec">
+      <div class="psec-label">Responsável</div>
+      <div class="pill-row">
+        ${RESPS.map(r => `
+          <button class="pill${task.responsavel === r.key ? ' sel-'+r.key : ''}"
+                  data-set-field="responsavel" data-val="${r.key}">${r.label}</button>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="psec">
+      <div class="psec-label">Status</div>
+      <div class="pill-row">
+        ${STATUSES.map(s => `
+          <button class="pill${task.status === s.key ? ' sel-'+s.key : ''}"
+                  data-set-field="status" data-val="${s.key}">${s.label}</button>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="psec">
+      <div class="psec-label">Semana</div>
+      <div class="pill-row">
+        <button class="pill${task.semana === cw ? ' sel-semana' : ''}"
+                data-set-field="semana" data-val="${cw}">Esta (${cw})</button>
+        <button class="pill${task.semana === nw ? ' sel-semana' : ''}"
+                data-set-field="semana" data-val="${nw}">Próxima (${nw})</button>
+        <button class="pill${customWeek ? ' sel-semana' : ''}"
+                data-action="custom-week">
+          ${customWeek ? task.semana : 'Outra...'}
+        </button>
+        ${task.semana ? `<button class="pill" data-set-field="semana" data-val="">Limpar</button>` : ''}
+      </div>
+    </div>
+
+    <div class="psec">
+      <div class="psec-label">Tipo</div>
+      <div class="pill-row">
+        <button class="pill${task.tipo === 'normal' ? ' sel-normal' : ''}"
+                data-set-tipo="normal">Normal</button>
+        <button class="pill${task.tipo === 'lote'   ? ' sel-lote'   : ''}"
+                data-set-tipo="lote">Lote (por obra)</button>
+      </div>
+    </div>
+
+    ${task.tipo === 'lote' ? `
+      <div class="psec">
+        <div class="psec-label">Obras incluídas (${task.subtarefas.length}/${st.obras.length})</div>
+        ${st.obras.length ? `
+          <div class="obra-checklist">
+            ${st.obras.map((obra, idx) => {
+              const checked = task.subtarefas.some(s => s.obra === obra);
+              return `
+                <label class="obra-check-row">
+                  <input type="checkbox" data-obra-idx="${idx}" ${checked ? 'checked' : ''}>
+                  <span>${esc(obra)}</span>
+                </label>
+              `;
+            }).join('')}
+          </div>
+        ` : '<div style="color:var(--muted);font-size:13px">Nenhuma obra cadastrada. Adicione obras na aba Obras.</div>'}
+      </div>
+    ` : ''}
+  `;
+
+  // ── bind events ──
+  const body = document.getElementById('panelBody');
+
+  // textarea blur → update text
+  const ta = body.querySelector('#panelText');
+  if (ta) {
+    ta.addEventListener('change', () => {
+      const t2 = st.tarefas.find(t => t.id === ui.organizeId);
+      if (!t2) return;
+      t2.texto = ta.value.trim() || t2.texto;
+      t2.atualizadaEm = nowISO();
+      if (ui.activeTab === 'inbox') renderInbox();
+      scheduleSave();
+    });
+  }
+
+  // pill: set field
+  body.querySelectorAll('[data-set-field]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const t2 = st.tarefas.find(t => t.id === ui.organizeId);
+      if (!t2) return;
+      const field = btn.dataset.setField;
+      const val   = btn.dataset.val || null;
+      t2[field] = val;
+      t2.atualizadaEm = nowISO();
+      renderPanel();
+      render();
+      scheduleSave();
+    });
+  });
+
+  // tipo buttons
+  body.querySelectorAll('[data-set-tipo]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const t2 = st.tarefas.find(t => t.id === ui.organizeId);
+      if (!t2) return;
+      t2.tipo = btn.dataset.setTipo;
+      if (t2.tipo === 'normal') t2.subtarefas = [];
+      t2.atualizadaEm = nowISO();
+      renderPanel();
+      scheduleSave();
+    });
+  });
+
+  // custom week
+  const cwBtn = body.querySelector('[data-action="custom-week"]');
+  if (cwBtn) {
+    cwBtn.addEventListener('click', () => {
+      const t2 = st.tarefas.find(t => t.id === ui.organizeId);
+      const def = t2?.semana || curWeek();
+      const val = prompt('Semana no formato YYYY-Wnn (ex: 2026-W21):', def);
+      if (!val) return;
+      if (!/^\d{4}-W\d{2}$/.test(val.trim())) { alert('Formato inválido. Use YYYY-Wnn.'); return; }
+      if (t2) { t2.semana = val.trim(); t2.atualizadaEm = nowISO(); }
+      renderPanel();
+      render();
+      scheduleSave();
+    });
+  }
+
+  // obra checkboxes
+  body.querySelectorAll('[data-obra-idx]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const t2   = st.tarefas.find(t => t.id === ui.organizeId);
+      if (!t2) return;
+      const obra = st.obras[parseInt(cb.dataset.obraIdx)];
+      if (!obra) return;
+      if (cb.checked) {
+        if (!t2.subtarefas.some(s => s.obra === obra)) {
+          t2.subtarefas.push({ obra, concluida: false });
+        }
+      } else {
+        t2.subtarefas = t2.subtarefas.filter(s => s.obra !== obra);
+      }
+      t2.atualizadaEm = nowISO();
+      // update label only
+      const lbl = body.querySelector(`[data-obra-idx="${cb.dataset.obraIdx}"]`)
+                     ?.closest('.psec')?.querySelector('.psec-label');
+      if (lbl) lbl.textContent = `Obras incluídas (${t2.subtarefas.length}/${st.obras.length})`;
+      scheduleSave();
+    });
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SEMANA
+// ═══════════════════════════════════════════════════════════════
+function renderSemana() {
+  document.getElementById('weekLabel').textContent = fmtWeek(ui.selWeek);
+
+  const all   = st.tarefas.filter(t => t.semana === ui.selWeek && t.status !== 'inbox');
+  const total = all.length;
+  const feitas    = all.filter(t => t.status === 'concluida').length;
+  const delegadas = all.filter(t => t.responsavel === 'terceiro').length;
+  const bloq      = all.filter(t => t.status === 'bloqueada').length;
+
+  document.getElementById('weekStats').innerHTML = `
+    <div class="stat-chip"><b>${total}</b> tarefa${total !== 1 ? 's' : ''}</div>
+    <div class="stat-chip" style="color:var(--green)"><b>${feitas}</b> feita${feitas !== 1 ? 's' : ''}</div>
+    <div class="stat-chip" style="color:var(--amber)"><b>${delegadas}</b> delegada${delegadas !== 1 ? 's' : ''}</div>
+    <div class="stat-chip" style="color:var(--red)"><b>${bloq}</b> bloqueada${bloq !== 1 ? 's' : ''}</div>
+  `;
+
+  const CARDS = [
+    { key: 'eu',         label: 'Eu',         cls: 'card-eu'         },
+    { key: 'estagiaria', label: 'Estagiária',  cls: 'card-estagiaria' },
+    { key: 'terceiro',   label: 'Terceiro',    cls: 'card-terceiro'   },
+  ];
+
+  document.getElementById('respGrid').innerHTML = CARDS.map(card => {
+    const tasks = all.filter(t => t.responsavel === card.key);
+    return `
+      <div class="resp-card ${card.cls}">
+        <div class="resp-card-head">
+          <i class="ti ti-user"></i> ${card.label}
+          <span class="count">${tasks.length} tarefa${tasks.length !== 1 ? 's' : ''}</span>
+        </div>
+        <div class="resp-tasks">
+          ${tasks.length
+            ? tasks.map(t => renderWeekTask(t)).join('')
+            : '<div class="no-tasks">Nenhuma tarefa</div>'
+          }
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // bind events
+  const grid = document.getElementById('respGrid');
+
+  // normal task checkbox
+  grid.querySelectorAll('[data-toggle-done]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const t = st.tarefas.find(x => x.id === cb.dataset.toggleDone);
+      if (!t) return;
+      t.status = cb.checked ? 'concluida' : 'aberta';
+      t.atualizadaEm = nowISO();
+      renderSemana();
+      scheduleSave();
+    });
+  });
+
+  // badge cycle
+  grid.querySelectorAll('[data-cycle-status]').forEach(badge => {
+    badge.addEventListener('click', () => {
+      const t = st.tarefas.find(x => x.id === badge.dataset.cycleStatus);
+      if (!t) return;
+      const cycle = { aberta: 'bloqueada', bloqueada: 'concluida', concluida: 'aberta' };
+      t.status = cycle[t.status] || 'aberta';
+      t.atualizadaEm = nowISO();
+      renderSemana();
+      scheduleSave();
+    });
+  });
+
+  // expand lote
+  grid.querySelectorAll('[data-expand]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.expand;
+      if (ui.expandedTasks.has(id)) ui.expandedTasks.delete(id);
+      else ui.expandedTasks.add(id);
+      renderSemana();
+    });
+  });
+
+  // subtask checkbox
+  grid.querySelectorAll('[data-subtask-task]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const t = st.tarefas.find(x => x.id === cb.dataset.subtaskTask);
+      if (!t) return;
+      const obra = cb.dataset.subtaskObra;
+      const sub  = t.subtarefas.find(s => s.obra === obra);
+      if (sub) sub.concluida = cb.checked;
+      const allDone = t.subtarefas.length > 0 && t.subtarefas.every(s => s.concluida);
+      if (allDone) t.status = 'concluida';
+      else if (t.status === 'concluida') t.status = 'aberta';
+      t.atualizadaEm = nowISO();
+      renderSemana();
+      scheduleSave();
+    });
+  });
+}
+
+function renderWeekTask(t) {
+  const isDone = t.status === 'concluida';
+  const BADGE = {
+    aberta:    ['badge-aberta',    'Aberta'],
+    bloqueada: ['badge-bloqueada', 'Bloqueada'],
+    concluida: ['badge-concluida', 'Concluída'],
+  };
+  const [bCls, bLabel] = BADGE[t.status] || BADGE.aberta;
+
+  if (t.tipo === 'lote') {
+    const total   = t.subtarefas.length;
+    const done    = t.subtarefas.filter(s => s.concluida).length;
+    const pct     = total ? Math.round((done / total) * 100) : 0;
+    const isExp   = ui.expandedTasks.has(t.id);
+    return `
+      <div class="wtask${isDone ? ' done' : ''}">
+        <div class="wtask-top">
+          <span class="wtask-text">${esc(t.texto)}</span>
+          <span class="badge ${bCls}" data-cycle-status="${esc(t.id)}">${bLabel}</span>
+        </div>
+        ${total > 0 ? `
+          <div class="progress-wrap">
+            <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+            <span class="progress-label">${done}/${total}</span>
+            <button class="btn btn-icon btn-sm" data-expand="${esc(t.id)}" title="${isExp ? 'Recolher' : 'Expandir'}">
+              <i class="ti ti-chevron-${isExp ? 'up' : 'down'}"></i>
+            </button>
+          </div>
+          <div class="subtask-list${isExp ? ' open' : ''}">
+            ${t.subtarefas.map(s => `
+              <label class="subtask-row${s.concluida ? ' done' : ''}">
+                <input type="checkbox" ${s.concluida ? 'checked' : ''}
+                       data-subtask-task="${esc(t.id)}"
+                       data-subtask-obra="${esc(s.obra)}">
+                <span>${esc(s.obra)}</span>
+              </label>
+            `).join('')}
+          </div>
+        ` : '<div style="font-size:12px;color:var(--muted);margin-top:4px">Nenhuma obra selecionada</div>'}
+      </div>
+    `;
+  }
+
+  return `
+    <div class="wtask${isDone ? ' done' : ''}">
+      <div class="wtask-top">
+        <label style="display:flex;align-items:flex-start;gap:7px;flex:1;cursor:pointer">
+          <input type="checkbox" ${isDone ? 'checked' : ''} data-toggle-done="${esc(t.id)}" style="margin-top:2px">
+          <span class="wtask-text">${esc(t.texto)}</span>
+        </label>
+        <span class="badge ${bCls}" data-cycle-status="${esc(t.id)}">${bLabel}</span>
+      </div>
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// OBRAS
+// ═══════════════════════════════════════════════════════════════
+function renderObras() {
+  const container = document.getElementById('obrasList');
+  if (!st.obras.length) {
+    container.innerHTML = `<div class="empty"><i class="ti ti-building"></i>Nenhuma obra cadastrada</div>`;
+    return;
+  }
+
+  container.innerHTML = st.obras.map((obra, idx) => {
+    const tasks  = st.tarefas.filter(t => t.tipo === 'lote' && t.subtarefas.some(s => s.obra === obra));
+    const isExp  = ui.expandedObra === obra;
+    return `
+      <div class="obra-row${isExp ? ' expanded' : ''}" data-obra-toggle="${idx}">
+        <span class="obra-name"><i class="ti ti-building" style="opacity:.35"></i> ${esc(obra)}</span>
+        <span class="obra-count">${tasks.length} tarefa${tasks.length !== 1 ? 's' : ''}</span>
+        <button class="btn btn-icon btn-danger" data-obra-del="${idx}" title="Remover obra">
+          <i class="ti ti-trash"></i>
+        </button>
+        <i class="ti ti-chevron-${isExp ? 'up' : 'down'}" style="color:var(--muted);pointer-events:none"></i>
+      </div>
+      ${isExp ? `
+        <div class="obra-detail open">
+          ${tasks.length ? tasks.map(t => {
+            const sub  = t.subtarefas.find(s => s.obra === obra);
+            const done = sub?.concluida;
+            return `
+              <div class="obra-task-row">
+                <i class="ti ti-${done ? 'circle-check' : 'circle-dashed'}"
+                   style="color:${done ? 'var(--green)' : 'var(--muted)'}"></i>
+                <span style="${done ? 'text-decoration:line-through;color:var(--muted)' : ''}">${esc(t.texto)}</span>
+                <span style="margin-left:auto;font-size:11px;color:var(--muted)">${t.semana || '—'}</span>
+              </div>
+            `;
+          }).join('') : '<div style="color:var(--muted);font-size:13px">Nenhuma tarefa lote para esta obra.</div>'}
+        </div>
+      ` : ''}
+    `;
+  }).join('');
+
+  // bind
+  container.querySelectorAll('[data-obra-toggle]').forEach(row => {
+    row.addEventListener('click', e => {
+      if (e.target.closest('[data-obra-del]')) return; // let del handle it
+      const obra = st.obras[parseInt(row.dataset.obraToggle)];
+      ui.expandedObra = ui.expandedObra === obra ? null : obra;
+      renderObras();
+    });
+  });
+
+  container.querySelectorAll('[data-obra-del]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const obra = st.obras[parseInt(btn.dataset.obraDel)];
+      if (!confirm(`Remover "${obra}"?\nSubtarefas referenciando esta obra serão mantidas nos lotes existentes.`)) return;
+      st.obras = st.obras.filter(o => o !== obra);
+      if (ui.expandedObra === obra) ui.expandedObra = null;
+      renderObras();
+      scheduleSave();
+    });
+  });
+}
+
+function addObra() {
+  const inp  = document.getElementById('newObraInput');
+  const nome = inp.value.trim();
+  if (!nome) return;
+  if (st.obras.includes(nome)) { alert('Obra já cadastrada.'); return; }
+  st.obras.push(nome);
+  inp.value = '';
+  renderObras();
+  scheduleSave();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GLOBAL EVENT DELEGATION
+// ═══════════════════════════════════════════════════════════════
+document.getElementById('inboxList').addEventListener('click', e => {
+  const btn = e.target.closest('[data-action]');
+  if (!btn) return;
+  const { action, id } = btn.dataset;
+  if (action === 'organize') openPanel(id);
+  if (action === 'delete')   deleteTask(id);
+});
+
+document.getElementById('newTaskInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addInboxTask();
+});
+document.getElementById('addTaskBtn').addEventListener('click', addInboxTask);
+
+document.getElementById('prevWeekBtn').addEventListener('click', () => {
+  ui.selWeek = shiftWeek(ui.selWeek, -1);
+  renderSemana();
+});
+document.getElementById('nextWeekBtn').addEventListener('click', () => {
+  ui.selWeek = shiftWeek(ui.selWeek, 1);
+  renderSemana();
+});
+
+document.getElementById('newObraInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addObra();
+});
+document.getElementById('addObraBtn').addEventListener('click', addObra);
+
+document.getElementById('panelCloseBtn').addEventListener('click', closePanel);
+document.getElementById('panelBackdrop').addEventListener('click', closePanel);
+document.getElementById('openCfgBtn').addEventListener('click', openConfigModal);
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+});
+
+document.getElementById('cfgSaveBtn').addEventListener('click', async () => {
+  const owner  = document.getElementById('cfgOwner').value.trim();
+  const repo   = document.getElementById('cfgRepo').value.trim();
+  const branch = document.getElementById('cfgBranch').value.trim() || 'main';
+  const token  = document.getElementById('cfgToken').value.trim();
+
+  if (!owner || !repo || !token) {
+    const err = document.getElementById('cfgError');
+    err.textContent = 'Preencha todos os campos obrigatórios.';
+    err.style.display = 'block';
+    return;
+  }
+
+  cfg = { owner, repo, branch, token };
+  cfgSave();
+  closeConfigModal();
+  await initApp();
+});
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+async function initApp() {
+  ui.selWeek = curWeek();
+  try {
+    await apiLoad();
+    render();
+  } catch(e) {
+    setSaveStatus('error');
+    const msg = `Erro ao carregar dados:\n${e.message}\n\nVerifique a configuração.`;
+    alert(msg);
+    openConfigModal();
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (cfgLoad() && cfgValid()) {
+    initApp();
+  } else {
+    openConfigModal();
+  }
+});
+</script>
+</body>
+</html>
