@@ -18,5 +18,17 @@
     "Obra 16",
     "Obra 17"
   ],
-  "tarefas": []
+  "tarefas": [
+    {
+      "id": "8ac59c01-735b-4e82-abcc-9579b903948e",
+      "texto": "ATUALIZAR CAMINHO DAS PASTAS NO SHAREPOINT DAS OBRAS",
+      "responsavel": null,
+      "semana": null,
+      "status": "inbox",
+      "tipo": "normal",
+      "subtarefas": [],
+      "criadaEm": "2026-05-11T17:31:00.311Z",
+      "atualizadaEm": "2026-05-11T17:31:00.311Z"
+    }
+  ]
 }
