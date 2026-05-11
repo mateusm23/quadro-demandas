@@ -20,6 +20,17 @@
   ],
   "tarefas": [
     {
+      "id": "99154b66-a0cc-4492-9d3e-371a13dbedd9",
+      "texto": "ANALISAR ALOCAÇÕES COND É O AMOR",
+      "responsavel": null,
+      "semana": null,
+      "status": "inbox",
+      "tipo": "normal",
+      "subtarefas": [],
+      "criadaEm": "2026-05-11T17:31:20.497Z",
+      "atualizadaEm": "2026-05-11T17:31:20.497Z"
+    },
+    {
       "id": "61d64fe4-d444-4685-8d43-77e151c30020",
       "texto": "ANLISAR MFO BE BONIFACIO]",
       "responsavel": null,
